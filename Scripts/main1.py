@@ -26,7 +26,7 @@ contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPRO
 num_contours = 0
 for contour in contours:
     area = cv2.contourArea(contour)
-    if area > 1000:  # adjust threshold to detect zebra crossing lines accurately
+    if area > 50:  # adjust threshold to detect zebra crossing lines accurately
         cv2.drawContours(img, [contour], 0, (33, 255, 0), 2)
         num_contours += 1
 

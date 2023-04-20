@@ -24,32 +24,32 @@ for img_file in os.listdir(img_dir):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Normalize the pixel values
-    gray_norm = np.divide(gray, 255)
+    gray_norm = np.divide(gray, 250)
 
     # Apply Gaussian smoothing
-    gray_blur = cv2.GaussianBlur(gray_norm, (5, 5), 70)
+    gray_blur = cv2.GaussianBlur(gray_norm, (17, 17), 400)
 
     # Apply thresholding
-    thresh = cv2.threshold(gray_blur, 0.7, 255, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(gray_blur, 0.8, 400, cv2.THRESH_BINARY)[1]
 
     # Apply morphology
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (4,10))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1,1))
     morph = cv2.morphologyEx(thresh.astype(np.uint8), cv2.MORPH_CLOSE, kernel)
 
-    # Find connected components
-    num_crossings, labels = cv2.connectedComponents(morph)
+    contours, hierarchy = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Subtract 1 from the number of crossings to exclude the background component
-    num_crossings -= 1
-    
-    # Draw the contours
-    contours, hierarchy = cv2.findContours(morph, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    img_contours = cv2.drawContours(img.copy(), contours, -2, (255, 0, 0), 2)
+    # Draw contours on original image and count number of contours
+    num_contours = 0
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > 650:  # adjust threshold to detect zebra crossing lines accurately
+            cv2.drawContours(img, [contour], -2, (0, 5,255), 2)
+            num_contours += 1
 
     # Save the image with contours
     img_file_name = img_file
     img_file_path = os.path.join(preprocessed_dir, img_file_name)
-    cv2.imwrite(img_file_path, img_contours)
+    cv2.imwrite(img_file_path, img)
 
     # Print the number of crossings
-    print(f"Number of zebra crossings: {num_crossings}")
+    print(f"Number of zebra crossings: {num_contours}")
